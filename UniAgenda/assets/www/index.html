@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta name="viewport" content="width=default-width; Materias-scalable=no"/>
+		<meta http-equiv="Content-type" content="text/html;charset=utf-8">
+		<title>UniAgenda</title>
+		<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+		<script type="text/javascript" charset="utf-8" src="jquery.min.js"></script>
+		<script src="https://s3.amazonaws.com/codiqa-cdn/jquery-1.7.2.min.js"></script>
+		<script src="https://s3.amazonaws.com/codiqa-cdn/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+		<link rel="stylesheet" href="https://s3.amazonaws.com/codiqa-cdn/mobile/1.2.0/jquery.mobile-1.2.0.min.css"/>
+
+		<script type="text/javascript" charset="utf-8">
+
+		var db;
+		var shortName = 'WebSqlDB';
+		var version = '1.0';
+		var displayName = 'WebSqlDB';
+		var maxSize = 65535;
+		 
+		function errorHandler(transaction, error){
+			alert('Erro: ' + error.message + ' codigo: ' + error.code); 
+		}
+
+		function successCallBack(){
+			ListDBValues(); 
+		}
+
+		function nullHandler(){};
+
+		function onBodyLoad(){
+			 
+			if (!window.openDatabase){
+				alert('Aparelho não possui suporte ao Banco de Dados.');
+			return;
+			}
+
+			db = openDatabase(shortName, version, displayName, maxSize);
+	
+			db.transaction(function(tx){
+			 
+				tx.executeSql( 'CREATE TABLE IF NOT EXISTS Materias(MateriaId INTEGER NOT NULL PRIMARY KEY, Materia TEXT NOT NULL, MateriaDescricao TEXT NOT NULL)',[],nullHandler,errorHandler);
+			},errorHandler,successCallBack);
+		}
+		 
+		function ListDBValues(){
+			if (!window.openDatabase) {
+			alert('Aparelho não possui suporte ao Banco de Dados.');
+			return;
+		}
+		 
+		$('#lbMateria').html('');
+		 
+		db.transaction(function(transaction){
+			transaction.executeSql('SELECT * FROM Materias;', [],
+				function(transaction, result){
+					if (result != null && result.rows != null){
+						for (var i = 0; i < result.rows.length; i++){
+							var row = result.rows.item(i);
+							$('#lbMateria').append('<br>' + row.MateriaId + '. ' +row.Materia+ ' ' + row.MateriaDescricao);
+						}
+					}
+				},errorHandler);
+			},errorHandler,nullHandler);
+			return;
+		}
+		 
+		function AddValueToDB(){
+			if (!window.openDatabase) {
+				alert('Aparelho não possui suporte ao Banco de Dados.');
+				return;
+			}
+			db.transaction(function(transaction){
+			transaction.executeSql('INSERT INTO Materias(Materia, MateriaDescricao) VALUES (?,?)',[$('#txMateria').val(), $('#txMateriaDescricao').val()],nullHandler,errorHandler);
+			});
+			ListDBValues();
+			return false;
+		}
+
+		$(document).bind("pageinit", function() {
+		  onDeviceReady();
+		});
+
+		function onDeviceReady(){
+		    $('#button_add_materia').click(function(event){
+		      AddValueToDB();
+		      event.preventDefault();
+		    });
+		}
+
+		</script>
+	</head>
+	<body onload="onBodyLoad()">
+		<h1>Cadastrar Matéria</h1>
+		<input id="txMateria" type="text" placeholder="Matéria">
+		<input id="txMateriaDescricao" type="text" placeholder="Descrição">
+		<input type="button" value="Adicionar" id="button_add_materia"> 
+		<br>
+		<br>
+		<span style="font-weight:bold;">Matérias:</span>
+		<span id="lbMateria"></span>
+	</body>
+</html> 
