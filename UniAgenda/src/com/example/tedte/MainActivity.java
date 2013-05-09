@@ -6,6 +6,7 @@ import com.example.tedte.R;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.view.Menu;
 
 public class MainActivity extends DroidGap {
@@ -14,6 +15,7 @@ public class MainActivity extends DroidGap {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		super.loadUrl("file:///android_asset/www/index.html");
+		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_BEHIND);
 	}
 
 	@Override
